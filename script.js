@@ -1,4 +1,4 @@
-﻿/* ============================================================
+/* ============================================================
    ZYNTEK — script.js
    Índice das áreas:
      1.  Google Translate (config + cookie + idioma)
@@ -539,7 +539,7 @@ document.addEventListener('DOMContentLoaded', () => {
     (() => {
 
         const elements = $$(
-            '.service-card, .step-card, .project-card, .team-member-btn, .cta-container, .contact-card'
+            '.service-card, .step-card, .team-member-btn, .cta-container, .contact-card'
         );
 
         if (!elements.length) return;
@@ -661,14 +661,14 @@ function initHomeBackgroundParticles() {
 
     const ctx = canvas.getContext('2d');
     let width, height, points;
-    const DENSITY = 14000;   // px² por ponto — maior = menos pontos
-    const LINK_DIST = 150;   // distância máxima para desenhar uma linha
+    const DENSITY = 24000;   // px² por ponto — maior = menos pontos
+    const LINK_DIST = 120;   // distância máxima para desenhar uma linha
     const SPEED = 0.18;
 
     function resize() {
         width = canvas.width = canvas.offsetWidth;
         height = canvas.height = canvas.offsetHeight;
-        const total = Math.max(24, Math.min(90, Math.round((width * height) / DENSITY)));
+        const total = Math.max(24, Math.min(60, Math.round((width * height) / DENSITY)));
         points = Array.from({ length: total }, () => ({
             x: Math.random() * width,
             y: Math.random() * height,
@@ -677,7 +677,11 @@ function initHomeBackgroundParticles() {
         }));
     }
 
-    function step() {
+    let lastTs = 0;
+    function step(ts) {
+        requestAnimationFrame(step);
+        if (document.hidden || ts - lastTs < 33) return;
+        lastTs = ts;
         ctx.clearRect(0, 0, width, height);
 
         points.forEach((p) => {
@@ -709,8 +713,6 @@ function initHomeBackgroundParticles() {
             ctx.arc(p.x, p.y, 1.6, 0, Math.PI * 2);
             ctx.fill();
         });
-
-        requestAnimationFrame(step);
     }
 
     let resizeTimer;
@@ -1207,84 +1209,145 @@ document.addEventListener('DOMContentLoaded', () => {
     live.style.transition = 'opacity .3s';
   }
 
-  /* Calculadora: escolha da dor -> projeto indicado + estimativa de lucro (%) */
-  const typeBox = $('#calc-type');
-  if (typeBox) {
+  /* Monte o seu site: simulador interativo (ramo + poderes + cor + tela -> prévia ao vivo) */
+  const mkR = $('#mk-ramos');
+  if (mkR) {
     const P = {
-      users:   '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
-      mega:    '<path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/>',
-      cart:    '<circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>',
-      bot:     '<rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><path d="M8 16h.01M16 16h.01"/>',
-      utensils:'<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/>',
-      scissors:'<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.12 15.88M14.47 14.48 20 20M8.12 8.12 12 12"/>',
-      dumbbell:'<path d="M6.5 6.5v11M17.5 6.5v11M3 9v6M21 9v6M6.5 12h11"/>',
-      zap:     '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
-      chat:    '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
-      card:    '<rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22"/>',
-      search:  '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>',
-      cpu:     '<rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3"/>',
-      chart:   '<path d="M18 20V10M12 20V4M6 20v-6"/>',
-      phone:   '<rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/>'
+      scissors: '<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.12 15.88M14.47 14.48 20 20M8.12 8.12 12 12"/>',
+      utensils: '<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/>',
+      bag: '<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/>',
+      dumbbell: '<path d="M6.5 6.5v11M17.5 6.5v11M3 9v6M21 9v6M6.5 12h11"/>',
+      wrench: '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94z"/>',
+      chat: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+      calendar: '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+      cart: '<circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>',
+      bot: '<rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 16h.01M16 16h.01"/>',
+      video: '<rect x="2" y="5" width="14" height="14" rx="2"/><path d="m22 8-6 4 6 4z"/>',
+      star: '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
+      image: '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/>',
+      pin: '<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/>',
+      laptop: '<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M2 20h20"/>',
+      phone: '<rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/>'
     };
     const ic = k => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[k]}</svg>`;
-    // g = % de lucro a mais (estimativa), h = horas livres por mês
-    const TYPES = {
-      clientes:    { i: 'users',    n: 'Falta de clientes',                      t: 'Landing Page de alta conversão', g: 45, h: 0,  why: 'Indicamos uma landing page para atrair visitantes e transformar cada um em contato todos os dias.', s: ['Landing page', 'Captura de leads'] },
-      alcance:     { i: 'mega',     n: 'Pouco alcance na internet',              t: 'Landing Page com SEO',           g: 40, h: 0,  why: 'Indicamos uma página otimizada para o Google, para o seu negócio ser encontrado por quem já procura.', s: ['Landing page', 'SEO', 'Analytics'] },
-      loja:        { i: 'cart',     n: 'Quero vender pela internet',             t: 'Loja Virtual Completa',          g: 55, h: 10, why: 'Indicamos uma loja virtual para vender 24 horas por dia, com estoque e pagamentos integrados.', s: ['E-commerce', 'Gestão de estoque'] },
-      chatbot:     { i: 'bot',      n: 'Atendimento lento ou fora do horário',   t: 'Chatbot de Fluxo Inteligente',   g: 35, h: 40, why: 'Indicamos um chatbot para responder na hora, triar clientes e não perder nenhum lead.', s: ['Chatbot 24h', 'Triagem de leads'] },
-      restaurante: { i: 'utensils', n: 'Pedidos e mesas desorganizados',         t: 'Sistema para Restaurantes',      g: 40, h: 15, why: 'Indicamos um sistema com pedidos, mesas e cardápio digital para organizar a operação.', s: ['Pedidos e mesas', 'Cardápio digital'] },
-      barbearia:   { i: 'scissors', n: 'Agenda bagunçada e clientes que somem',  t: 'Sistema para Barbearias',        g: 38, h: 15, why: 'Indicamos agendamento inteligente e fidelização para encher a agenda e fazer o cliente voltar.', s: ['Agendamento', 'Fidelização'] },
-      academia:    { i: 'dumbbell', n: 'Alunos saindo e planos mal controlados', t: 'Sistema para Academias',         g: 35, h: 20, why: 'Indicamos um sistema de gestão de planos e acesso para aumentar a retenção de alunos.', s: ['Gestão de alunos', 'Retenção'] },
-      processos:   { i: 'zap',      n: 'Muito trabalho manual e repetitivo',     t: 'Automação com IA',               g: 42, h: 30, why: 'Indicamos automações com IA para eliminar tarefas repetitivas e reduzir custos.', s: ['Automação', 'IA'] }
+    const RAMOS = {
+      barb: { ic: 'scissors', n: 'Barbearia', url: 'sua-barbearia.com.br', title: 'Seu estilo, no horário certo', sub: 'Escolha o serviço e reserve em segundos.', btn: 'Agendar agora', agT: 'HORÁRIOS DE HOJE', slots: ['09:00', '10:30', '14:00', '16:30'], prods: ['Corte', 'Barba', 'Combo'], pbtn: 'Escolher', chat: ['Oi! Posso te ajudar a agendar?', ['Quero agendar', 'Onde fica?'], ['Show! Escolha um horário acima.', 'Te envio a localização agora.']],
+        vid: ['Tour pela barbearia', 'Corte ao vivo', 'Clientes'], rev: [['Lucas M.', 'Agendei em 10 segundos. Atendimento nota 10!'], ['Rafael P.', 'Saí de lá outro homem. Voltarei sempre.']], gal: ['Degradê', 'Barba', 'Navalhado', 'Pigmentação'], addr: 'Rua das Flores, 123 · Centro', hrs: 'Aberto até 20h' },
+      rest: { ic: 'utensils', n: 'Restaurante', url: 'seu-restaurante.com.br', title: 'Fome? Peça sem sair do lugar', sub: 'Cardápio digital com pedido direto.', btn: 'Ver cardápio', agT: 'RESERVAR MESA', slots: ['19:00', '20:00', '21:00', '22:00'], prods: ['Burger', 'Pizza', 'Suco'], pbtn: 'Adicionar', chat: ['Oi! Já quer fazer seu pedido?', ['Ver cardápio', 'Tem entrega?'], ['Abrindo o cardápio pra você!', 'Me passa seu endereço e eu confirmo.']],
+        vid: ['Tour pela cozinha', 'Prato do dia', 'Clientes'], rev: [['Camila R.', 'Pedi pelo site e chegou quentinho!'], ['Bruno T.', 'Cardápio fácil, entrega no horário.']], gal: ['Burgers', 'Pizzas', 'Sobremesas', 'Bebidas'], addr: 'Av. Brasil, 450 · Centro', hrs: 'Aberto até 23h' },
+      loja: { ic: 'bag', n: 'Loja', url: 'sua-loja.com.br', title: 'Sua loja aberta 24 horas', sub: 'Produtos, pagamento e entrega num só lugar.', btn: 'Comprar agora', agT: 'RETIRADA NA LOJA', slots: ['Hoje', 'Amanhã', 'Sábado'], prods: ['Camiseta', 'Tênis', 'Boné'], pbtn: 'Adicionar', chat: ['Oi! Procurando algum produto?', ['Ver novidades', 'Formas de pagar'], ['Separei as novidades pra você!', 'Pix e cartão, como preferir.']],
+        vid: ['Conheça a loja', 'Novidades', 'Unboxing'], rev: [['Marina S.', 'Comprei por Pix e chegou rapidinho.'], ['Diego L.', 'Site rápido e produto igual à foto.']], gal: ['Camisetas', 'Tênis', 'Acessórios', 'Promoções'], addr: 'Rua do Comércio, 80', hrs: 'Aberto até 19h' },
+      acad: { ic: 'dumbbell', n: 'Academia', url: 'sua-academia.com.br', title: 'Treine mais, falte menos', sub: 'Planos, aulas e acesso na palma da mão.', btn: 'Aula experimental', agT: 'AULA EXPERIMENTAL', slots: ['07:00', '12:00', '18:00', '19:30'], prods: ['Mensal', 'Trimestral', 'Anual'], pbtn: 'Escolher', chat: ['Oi! Quer conhecer a academia?', ['Ver planos', 'Aula grátis?'], ['Temos plano pra cada perfil.', 'Reserve o horário aqui em cima!']],
+        vid: ['Tour pela academia', 'Aula em ação', 'Alunos'], rev: [['Paula G.', 'Reservei a aula pelo site, super fácil.'], ['André C.', 'Ambiente ótimo e treinos que funcionam.']], gal: ['Musculação', 'Funcional', 'Spinning', 'Alongamento'], addr: 'Av. Paraná, 900', hrs: 'Aberto das 6h às 22h' },
+      serv: { ic: 'wrench', n: 'Serviços', url: 'seu-nome.com.br', title: 'Seu trabalho, bem apresentado', sub: 'Mostre o que faz e receba pedidos de orçamento.', btn: 'Pedir orçamento', agT: 'AGENDAR VISITA', slots: ['Seg', 'Ter', 'Qua', 'Qui'], prods: ['Orçamento', 'Visita', 'Serviço'], pbtn: 'Escolher', chat: ['Oi! Como posso ajudar?', ['Pedir orçamento', 'Ver trabalhos'], ['Me conta o que você precisa.', 'Já te mostro alguns trabalhos!']],
+        vid: ['Nosso trabalho', 'Passo a passo', 'Clientes'], rev: [['Sérgio N.', 'Orçamento no mesmo dia, serviço impecável.'], ['Helena F.', 'Profissional pontual e caprichoso.']], gal: ['Projeto 1', 'Projeto 2', 'Antes e depois', 'Entrega'], addr: 'Atendemos toda a região', hrs: 'Segunda a sábado' }
     };
-    const FEATS = {
-      wa:    { i: 'chat',   n: 'Integração WhatsApp',     g: 4, h: 8,  s: 'WhatsApp' },
-      pay:   { i: 'card',   n: 'Pagamentos (Pix/cartão)', g: 4, h: 5,  s: 'Pix e cartão' },
-      seo:   { i: 'search', n: 'SEO técnico',             g: 5, h: 0,  s: 'SEO' },
-      ia:    { i: 'cpu',    n: 'Inteligência Artificial', g: 6, h: 20, s: 'IA' },
-      admin: { i: 'chart',  n: 'Painel administrativo',   g: 3, h: 10, s: 'Painel admin' },
-      pwa:   { i: 'phone',  n: 'App instalável (PWA)',    g: 3, h: 0,  s: 'App PWA' }
+    const POW = {
+      wa: ['chat', 'WhatsApp', 'Cliente chama com 1 toque'], agenda: ['calendar', 'Agendamento', 'Horários sem vai e volta'],
+      loja: ['cart', 'Vendas online', 'Produtos e carrinho'], chat: ['bot', 'Chatbot', 'Responde sozinho, 24h'],
+      video: ['video', 'Vídeos', 'Mostre seu trabalho'], reviews: ['star', 'Avaliações', 'Prova social'],
+      galeria: ['image', 'Galeria', 'Fotos do seu trabalho'], mapa: ['pin', 'Localização', 'Como chegar']
     };
-    const mk = (box, name, type, obj, checked) => {
-      box.innerHTML = Object.entries(obj).map(([k, v], i) =>
-        `<label class="tile"><input type="${type}" name="${name}" value="${k}" ${checked && i === 0 ? 'checked' : ''}><span class="tile-in"><span class="tile-ico">${ic(v.i)}</span><span class="tile-tx">${v.n}</span><span class="tile-ck" aria-hidden="true"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></span></label>`).join('');
-    };
-    mk(typeBox, 'ctype', 'radio', TYPES, true);
-    mk($('#calc-feats'), 'cfeat', 'checkbox', FEATS, false);
-    const ring = $('#calc-ring'), pctEl = $('#calc-days');
-    let shown = 0;
-    const countTo = (to) => {
-      const from = shown, t0 = performance.now();
-      const step = (t) => {
-        const k = Math.min(1, (t - t0) / 500);
-        shown = Math.round(from + (to - from) * k);
-        pctEl.textContent = '+' + shown + '%';
-        if (k < 1) requestAnimationFrame(step);
-      };
-      requestAnimationFrame(step);
-    };
+    const COLORS = [['Violeta', '#8b5cf6', '#6d28d9'], ['Azul', '#3b82f6', '#1d4ed8'], ['Rosa', '#ec4899', '#be185d'], ['Laranja', '#f97316', '#c2410c'], ['Verde', '#22c55e', '#15803d']];
+    const KEYS = Object.keys(POW), TOTAL = KEYS.length;
+    let ramo = 'barb', touched = false, cart = 0, vi = 0;
+    const on = {}; KEYS.forEach(k => on[k] = false);
+
+    mkR.innerHTML = Object.entries(RAMOS).map(([k, v], i) => `<label class="mk-ramo"><input type="radio" name="mkr" value="${k}" ${i === 0 ? 'checked' : ''}><span>${ic(v.ic)}<b>${v.n}</b></span></label>`).join('');
+    $('#mk-powers').innerHTML = Object.entries(POW).map(([k, v]) => `<label class="mk-pow" title="${v[2]}"><input type="checkbox" name="mkp" value="${k}"><i class="mk-pow-ic">${ic(v[0])}</i><span><b>${v[1]}</b></span><em class="mk-sw" aria-hidden="true"></em></label>`).join('');
+    $('#mk-colors').innerHTML = COLORS.map((c, i) => `<label class="mk-col" title="${c[0]}"><input type="radio" name="mkc" value="${i}" ${i === 0 ? 'checked' : ''} aria-label="${c[0]}"><span style="--a:${c[1]};--b:${c[2]}"></span></label>`).join('');
+    $('#mk-dev').innerHTML = [['desk', 'laptop', 'Computador'], ['phone', 'phone', 'Celular']].map(([v, i, t], n) => `<label><input type="radio" name="mkd" value="${v}" ${n === 0 ? 'checked' : ''}><span>${ic(i)}${t}</span></label>`).join('');
+
+    const stage = $('.mk-stage'), br = $('#mk-browser'), pg = $('#mk-pg');
     const pop = el => { el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); };
-    const calc = () => {
-      const t = TYPES[$('input[name=ctype]:checked').value];
-      const fs = $$('input[name=cfeat]:checked').map(i => FEATS[i.value]);
-      const hi = Math.min(95, t.g + fs.reduce((a, x) => a + x.g, 0));
-      const lo = Math.round(hi * .7);
-      const h = t.h + fs.reduce((a, x) => a + x.h, 0);
-      ring.style.strokeDashoffset = 326.7 * (1 - Math.min(1, hi / 100));
-      countTo(hi);
-      $('#calc-pick-icon').innerHTML = ic(t.i); $('#calc-pick-name').textContent = t.t; pop($('.calc-pick'));
-      $('#calc-level').textContent = `De +${lo}% a +${hi}% de lucro`;
-      $('#calc-range-txt').textContent = t.why + (h ? ` Cerca de ${h}h por mês livres da sua equipe.` : '');
-      $('#calc-bar-now').style.width = (100 / (1 + hi / 100)) + '%'; $('#calc-bar-new').style.width = '100%';
-      $('#calc-now-val').textContent = '100%'; $('#calc-new-val').textContent = (100 + hi) + '%';
-      const stack = [...new Set([...t.s, ...fs.map(x => x.s)])];
-      $('#calc-stack').innerHTML = stack.map(s => `<span>${s}</span>`).join('');
-      const msg = `Olá, Zyntek! Fiz a simulação no site. Minha dificuldade hoje: ${t.n.toLowerCase()}. O projeto indicado foi: ${t.t}${fs.length ? ' com ' + fs.map(x => x.n.toLowerCase()).join(', ') : ''}. A estimativa foi de +${lo}% a +${hi}% de lucro. Podemos conversar?`;
-      $('#calc-cta').href = 'https://wa.me/554488317870?text=' + encodeURIComponent(msg);
+
+    const playVid = (go) => { const v = $('#mk-vid'); v.classList.remove('playing'); if (go) { void v.offsetWidth; v.classList.add('playing'); } $('#mk-play').setAttribute('aria-label', go ? 'Pausar vídeo' : 'Reproduzir vídeo'); };
+    const renderVid = () => {
+      const v = RAMOS[ramo];
+      $('#mk-vid-list').innerHTML = v.vid.map((t, i) => `<button type="button" data-i="${i}" class="${i === vi ? 'sel' : ''}"><i>${i + 1}</i>${t}</button>`).join('');
+      $('#mk-vid-cap').textContent = v.vid[vi]; $('#mk-vid').dataset.v = vi;
     };
-    $('.calc-card').addEventListener('input', calc);
-    calc();
+    const renderRamo = () => {
+      const v = RAMOS[ramo]; vi = 0;
+      $('#mk-url').textContent = v.url; $('#mk-tag').textContent = v.n.toUpperCase();
+      $('#mk-title').textContent = v.title; $('#mk-sub').textContent = v.sub; $('#mk-btn').textContent = v.btn;
+      $('#mk-art').innerHTML = ic(v.ic); $('#mk-agenda-t').textContent = v.agT;
+      $('#mk-slots').innerHTML = v.slots.map((s, i) => `<button type="button" class="mk-slot${i === 1 ? ' sel' : ''}">${s}</button>`).join('');
+      $('#mk-prods').innerHTML = v.prods.map(p => `<div class="mk-prod"><div class="mk-prod-img">${ic(v.ic)}</div><b>${p}</b><i class="mk-prod-line"></i><button type="button" class="mk-add">${v.pbtn}</button></div>`).join('');
+      $('#mk-gal').innerHTML = v.gal.map((g, i) => `<button type="button" class="mk-g g${i}${i === 0 ? ' sel' : ''}">${ic(i % 2 ? 'image' : v.ic)}<span>${g}</span></button>`).join('');
+      $('#mk-rev').innerHTML = v.rev.map(r => `<div class="mk-r"><i>${r[0][0]}</i><div><b>${r[0]}</b><span class="mk-stars" aria-hidden="true">★★★★★</span><p>${r[1]}</p></div></div>`).join('');
+      $('#mk-addr').textContent = v.addr; $('#mk-hrs').textContent = v.hrs;
+      $('#mk-chat-b').innerHTML = `<div class="mk-m bot">${v.chat[0]}</div>`;
+      $('#mk-chat-q').innerHTML = v.chat[1].map((q, i) => `<button type="button" data-i="${i}">${q}</button>`).join('');
+      $$('#mk-rate button').forEach(b => b.classList.remove('sel')); $('#mk-rate-t').textContent = 'Toque para avaliar';
+      cart = 0; $('#mk-cart-n').textContent = '0';
+      renderVid(); playVid(false); pg.scrollTo({ top: 0, behavior: 'smooth' });
+      pop($('.mk-hero-tx')); pop($('#mk-art'));
+    };
+    const sync = () => {
+      const n = KEYS.filter(k => on[k]).length;
+      KEYS.forEach(k => {
+        br.querySelectorAll(`[data-mod="${k}"]`).forEach(el => el.classList.toggle('on', on[k]));
+        const i = $(`input[name=mkp][value=${k}]`); if (i) i.checked = on[k];
+      });
+      $('#mk-count').textContent = n === TOTAL ? 'Completo!' : n + '/' + TOTAL + ' poderes';
+      $('#mk-bar').style.width = (n * 100 / TOTAL) + '%';
+      stage.classList.toggle('full', n === TOTAL);
+      $('#mk-cart').classList.toggle('on', on.loja);
+      const names = KEYS.filter(k => on[k]).map(k => POW[k][1].toLowerCase());
+      const msg = `Olá, Zyntek! Montei o meu site no simulador. Ramo: ${RAMOS[ramo].n}. Poderes: ${names.length ? names.join(', ') : 'ainda não escolhi'}. Quero conversar sobre ele!`;
+      const url = 'https://wa.me/554488317870?text=' + encodeURIComponent(msg);
+      $('#mk-cta').href = url; $('.mk-wa', br).href = url;
+    };
+    const goTo = k => {
+      const m = $(`.mk-mod[data-mod="${k}"]`, br); if (!m) return;
+      setTimeout(() => pg.scrollTo({ top: Math.max(0, m.offsetTop - 10), behavior: 'smooth' }), 150);
+    };
+
+    mkR.addEventListener('change', e => { touched = true; ramo = e.target.value; renderRamo(); sync(); });
+    $('#mk-powers').addEventListener('change', e => { touched = true; on[e.target.value] = e.target.checked; sync(); if (e.target.checked) goTo(e.target.value); });
+    $('#mk-colors').addEventListener('change', e => { touched = true; const c = COLORS[+e.target.value]; br.style.setProperty('--mk-a', c[1]); br.style.setProperty('--mk-b', c[2]); });
+    $('#mk-dev').addEventListener('change', e => { touched = true; br.classList.toggle('is-phone', e.target.value === 'phone'); });
+    br.addEventListener('click', e => {
+      const sl = e.target.closest('.mk-slot');
+      if (sl) { $$('.mk-slot', br).forEach(x => x.classList.toggle('sel', x === sl)); return; }
+      const ad = e.target.closest('.mk-add');
+      if (ad) {
+        cart++; $('#mk-cart-n').textContent = cart; pop($('#mk-cart'));
+        ad.classList.add('added'); ad.textContent = 'Adicionado';
+        setTimeout(() => { ad.classList.remove('added'); ad.textContent = RAMOS[ramo].pbtn; }, 1200);
+        return;
+      }
+      if (e.target.closest('#mk-play')) { playVid(!$('#mk-vid').classList.contains('playing')); return; }
+      const vb = e.target.closest('#mk-vid-list button');
+      if (vb) { vi = +vb.dataset.i; renderVid(); playVid(true); return; }
+      const g = e.target.closest('.mk-g');
+      if (g) { $$('.mk-g', br).forEach(x => x.classList.toggle('sel', x === g)); return; }
+      const st = e.target.closest('#mk-rate button');
+      if (st) {
+        const bs = $$('#mk-rate button'), i = bs.indexOf(st);
+        bs.forEach((b, j) => b.classList.toggle('sel', j <= i));
+        $('#mk-rate-t').textContent = 'Obrigado pela avaliação!'; return;
+      }
+      const q = e.target.closest('.mk-chat-q button');
+      if (q) {
+        const i = +q.dataset.i, b = $('#mk-chat-b');
+        b.insertAdjacentHTML('beforeend', `<div class="mk-m me">${RAMOS[ramo].chat[1][i]}</div>`);
+        q.remove(); b.scrollTop = b.scrollHeight;
+        setTimeout(() => { b.insertAdjacentHTML('beforeend', `<div class="mk-m bot">${RAMOS[ramo].chat[2][i]}</div>`); b.scrollTop = b.scrollHeight; }, 500);
+      }
+    });
+    br.addEventListener('click', e => { if (e.target.closest('.mk-wa')) e.preventDefault(); });
+
+    renderRamo(); sync();
+    /* Demonstração automática: os poderes ligam um a um quando a seção aparece (só se a pessoa ainda não mexeu) */
+    if ('IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      const io = new IntersectionObserver(([en]) => {
+        if (!en.isIntersecting) return; io.disconnect();
+        KEYS.forEach((k, i) => setTimeout(() => { if (touched) return; on[k] = true; sync(); goTo(k); }, 600 + i * 900));
+      }, { threshold: .45 });
+      io.observe(stage);
+    }
   }
 
   /* Fundadores: ao clicar numa foto, o outro card escurece e recua; o texto do escolhido aparece por completo */
@@ -1300,7 +1363,8 @@ document.addEventListener('DOMContentLoaded', () => {
     showPanel('fpanel-' + btn.dataset.who);
   }));
 
-  /* Projetos: a página "trava" e o scroll vertical anda os cards para o lado até o último */
+  /* Projetos: a página "trava" e o scroll vertical anda os cards para o lado.
+     Otimizado: 1 leitura de layout por frame; destaque do card ativo via classe (sem opacity/scale por frame). */
   const pin = $('.projects-pin');
   if (pin && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
     const track = $('.projects-grid', pin), cards = $$('.project-card', pin);
@@ -1308,28 +1372,28 @@ document.addEventListener('DOMContentLoaded', () => {
     pin.classList.add('is-scroll');
     pin.style.setProperty('--n', cards.length);
     cards.forEach(c => c.classList.add('in-view'));
-    let queued = false;
+    let total = 1, dist = 0, cur = -1, queued = false;
     const upd = () => {
       queued = false;
-      const total = pin.offsetHeight - innerHeight;
       const p = Math.max(0, Math.min(1, -pin.getBoundingClientRect().top / total));
-      const dist = Math.max(0, track.scrollWidth - innerWidth);
-      track.style.transform = `translate3d(${-p * dist}px,0,0)`;
-      bar.style.transform = `scaleX(${p})`;
-      cnt.textContent = (Math.round(p * (cards.length - 1)) + 1) + ' / ' + cards.length;
-      cards.forEach(c => {
-        const r = c.getBoundingClientRect(), d = Math.min(1, Math.abs(r.left + r.width / 2 - innerWidth / 2) / innerWidth);
-        c.style.opacity = 1 - d * .55; c.style.scale = 1 - d * .07;
-      });
+      track.style.transform = `translate3d(${(-p * dist).toFixed(1)}px,0,0)`;
+      bar.style.transform = `scaleX(${p.toFixed(3)})`;
+      const idx = Math.round(p * (cards.length - 1));
+      if (idx !== cur) {
+        cur = idx;
+        cnt.textContent = (idx + 1) + ' / ' + cards.length;
+        cards.forEach((c, i) => c.classList.toggle('is-active', i === idx));
+      }
     };
+    const measure = () => { total = Math.max(1, pin.offsetHeight - innerHeight); dist = Math.max(0, track.scrollWidth - innerWidth); upd(); };
     addEventListener('scroll', () => { if (!queued) { queued = true; requestAnimationFrame(upd); } }, { passive: true });
-    addEventListener('resize', upd); upd();
+    addEventListener('resize', measure); addEventListener('load', measure); measure();
   }
 
   /* Reveal suave ao entrar na tela */
   if ('IntersectionObserver' in window) {
     const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('revealed'); io.unobserve(e.target); } }), { threshold: .15 });
-    $$('.founders-intro, .fcenter, .calc-intro, .calc-card').forEach(el => { el.classList.add('reveal'); io.observe(el); });
+    $$('.founders-intro, .fcenter, .mk-intro, .mk-stage').forEach(el => { el.classList.add('reveal'); io.observe(el); });
   }
 
   /* Footer: rede de nós animada */
@@ -1359,4 +1423,62 @@ document.addEventListener('DOMContentLoaded', () => {
     size(); addEventListener('resize', size);
     new IntersectionObserver(([e]) => { const was = run; run = e.isIntersecting; if (run && !was) draw(); }).observe(cv);
   }
+})();
+
+
+/* ==========================================================
+   v7 — vídeos só tocam quando visíveis + botão flutuante
+========================================================== */
+(() => {
+  const $ = (s, r = document) => r.querySelector(s);
+
+  if ('IntersectionObserver' in window) {
+    const vio = new IntersectionObserver(es => es.forEach(e => {
+      const v = e.target;
+      if (e.isIntersecting) { const p = v.play(); if (p && p.catch) p.catch(() => {}); }
+      else v.pause();
+    }), { rootMargin: '150px' });
+    document.querySelectorAll('video').forEach(v => { if (v.id === 'hero-video') return; v.muted = true; vio.observe(v); });
+  }
+
+  const fab = $('#zfab'); if (!fab) return;
+  const pill = $('#zpill'), panel = $('#zpanel'), body = $('#zpanel-body');
+  const msgs = $('#zfaq-msgs'), qbox = $('#zfaq-q');
+  const WA = 'https://wa.me/554488317870?text=';
+  const IMG = 'zynk-mascote.png';
+
+  const FAQ = [
+    ['Quais serviços vocês fazem?', 'Desenvolvemos software e sistemas sob medida, automações e chatbots com IA, landing pages, lojas virtuais e UI/UX.'],
+    ['Quanto custa um projeto?', 'O valor depende do que você precisa. Veja a página de <a href="precos.html">Planos</a> ou peça um orçamento pelo WhatsApp.'],
+    ['Como peço um orçamento?', 'Pelo botão de WhatsApp aqui no painel ou pelo <a href="#contatos">formulário de contato</a>. Conte rapidamente a sua ideia.'],
+    ['Posso ver exemplos de projetos?', 'Claro! Role até a seção <a href="#projetos">Projetos</a> e clique em "Veja exemplo" em cada card.'],
+    ['Quem vai me atender?', 'Os dois fundadores, Henrique (CTO) e Levy (COO &amp; CDO). O contato é direto, sem intermediários.'],
+    ['Vocês ajudam depois da entrega?', 'Sim. O mesmo time acompanha o projeto depois da entrega e, se algo quebrar, a gente resolve.']
+  ];
+  const add = (who, html, typing) => {
+    const d = document.createElement('div'); d.className = 'zmsg ' + who + (typing ? ' typing' : '');
+    d.innerHTML = who === 'bot' ? `<img src="${IMG}" alt=""><div>${typing ? '<span class="zdots"><i></i><i></i><i></i></span>' : html}</div>` : `<div>${html}</div>`;
+    msgs.appendChild(d); d.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    return d;
+  };
+  const greet = () => { if (!msgs.children.length) add('bot', 'Olá! Sou o Zynk, assistente da Zyntek. Selecione uma pergunta abaixo para ver a resposta imediata:'); };
+  const setOpen = on => {
+    fab.classList.toggle('open', on);
+    pill.setAttribute('aria-expanded', on); panel.setAttribute('aria-hidden', !on);
+    pill.setAttribute('aria-label', on ? 'Fechar atendimento Zyntek' : 'Abrir atendimento Zyntek');
+    if (on) greet();
+  };
+  FAQ.forEach(([q, a]) => {
+    const b = document.createElement('button'); b.type = 'button'; b.textContent = q;
+    b.addEventListener('click', () => {
+      add('me', q);
+      const t = add('bot', '', true);
+      setTimeout(() => { t.classList.remove('typing'); t.lastElementChild.innerHTML = a; t.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }, 550);
+    });
+    qbox.appendChild(b);
+  });
+  pill.addEventListener('click', () => setOpen(!fab.classList.contains('open')));
+  $('#zpanel-x').addEventListener('click', () => setOpen(false));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') setOpen(false); });
+  panel.addEventListener('click', e => { if (e.target.closest('a[href^="#"]')) setOpen(false); });
 })();
